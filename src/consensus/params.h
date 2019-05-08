@@ -103,6 +103,8 @@ struct Params {
     }
     uint32_t nLyra2zTimestamp;
     uint32_t nX16rtTimestamp;
+
+    std::string foundationAddress;
 };
 } // namespace Consensus
 

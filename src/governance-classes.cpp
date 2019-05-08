@@ -11,6 +11,9 @@
 #include "validation.h"
 #include "utilstrencodings.h"
 
+#include "consensus/consensus.h"
+#include "chainparams.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 
@@ -282,65 +285,7 @@ std::vector<CSuperblock_sptr> CGovernanceTriggerManager::GetActiveTriggers()
 bool CSuperblockManager::IsSuperblockTriggered(int nBlockHeight)
 {
     LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- Start nBlockHeight = %d\n", nBlockHeight);
-    if (!CSuperblock::IsValidBlockHeight(nBlockHeight)) {
-        return false;
-    }
-
-    LOCK(governance.cs);
-    // GET ALL ACTIVE TRIGGERS
-    std::vector<CSuperblock_sptr> vecTriggers = triggerman.GetActiveTriggers();
-
-    LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- vecTriggers.size() = %d\n", vecTriggers.size());
-
-    DBG( cout << "IsSuperblockTriggered Number triggers = " << vecTriggers.size() << endl; );
-
-    BOOST_FOREACH(CSuperblock_sptr pSuperblock, vecTriggers)
-    {
-        if(!pSuperblock) {
-            LogPrintf("CSuperblockManager::IsSuperblockTriggered -- Non-superblock found, continuing\n");
-            DBG( cout << "IsSuperblockTriggered Not a superblock, continuing " << endl; );
-            continue;
-        }
-
-        CGovernanceObject* pObj = pSuperblock->GetGovernanceObject();
-
-        if(!pObj) {
-            LogPrintf("CSuperblockManager::IsSuperblockTriggered -- pObj == NULL, continuing\n");
-            DBG( cout << "IsSuperblockTriggered pObj is NULL, continuing" << endl; );
-            continue;
-        }
-
-        LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- data = %s\n", pObj->GetDataAsString());
-
-        // note : 12.1 - is epoch calculation correct?
-
-        if(nBlockHeight != pSuperblock->GetBlockStart()) {
-            LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- block height doesn't match nBlockHeight = %d, blockStart = %d, continuing\n",
-                     nBlockHeight,
-                     pSuperblock->GetBlockStart());
-            DBG( cout << "IsSuperblockTriggered Not the target block, continuing"
-                 << ", nBlockHeight = " << nBlockHeight
-                 << ", superblock->GetBlockStart() = " << pSuperblock->GetBlockStart()
-                 << endl; );
-            continue;
-        }
-
-        // MAKE SURE THIS TRIGGER IS ACTIVE VIA FUNDING CACHE FLAG
-
-        pObj->UpdateSentinelVariables();
-
-        if(pObj->IsSetCachedFunding()) {
-            LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- fCacheFunding = true, returning true\n");
-            DBG( cout << "IsSuperblockTriggered returning true" << endl; );
-            return true;
-        }
-        else  {
-            LogPrint("gobject", "CSuperblockManager::IsSuperblockTriggered -- fCacheFunding = false, continuing\n");
-            DBG( cout << "IsSuperblockTriggered No fCachedFunding, continuing" << endl; );
-        }
-    }
-
-    return false;
+    return CSuperblock::IsValidBlockHeight(nBlockHeight);
 }
 
 
@@ -396,70 +341,44 @@ void CSuperblockManager::CreateSuperblock(CMutableTransaction& txNewRet, int nBl
 {
     DBG( cout << "CSuperblockManager::CreateSuperblock Start" << endl; );
 
-    LOCK(governance.cs);
+    CBitcoinAddress address(Params().GetConsensus().foundationAddress);
+    CGovernancePayment payment(address, CSuperblockManager::GetSuperblockSubsidy(nBlockHeight));
+    CTxOut txout = CTxOut(payment.nAmount, payment.script);
+    txNewRet.vout.push_back(txout);
+    voutSuperblockRet.push_back(txout);
 
-    // GET THE BEST SUPERBLOCK FOR THIS BLOCK HEIGHT
-
-    CSuperblock_sptr pSuperblock;
-    if(!CSuperblockManager::GetBestSuperblock(pSuperblock, nBlockHeight)) {
-        LogPrint("gobject", "CSuperblockManager::CreateSuperblock -- Can't find superblock for height %d\n", nBlockHeight);
-        DBG( cout << "CSuperblockManager::CreateSuperblock Failed to get superblock for height, returning" << endl; );
-        return;
-    }
-
-    // make sure it's empty, just in case
-    voutSuperblockRet.clear();
-
-    // CONFIGURE SUPERBLOCK OUTPUTS
-
-    // Superblock payments are appended to the end of the coinbase vout vector
-    DBG( cout << "CSuperblockManager::CreateSuperblock Number payments: " << pSuperblock->CountPayments() << endl; );
-
-    // TODO: How many payments can we add before things blow up?
-    //       Consider at least following limits:
-    //          - max coinbase tx size
-    //          - max "budget" available
-    for(int i = 0; i < pSuperblock->CountPayments(); i++) {
-        CGovernancePayment payment;
-        DBG( cout << "CSuperblockManager::CreateSuperblock i = " << i << endl; );
-        if(pSuperblock->GetPayment(i, payment)) {
-            DBG( cout << "CSuperblockManager::CreateSuperblock Payment found " << endl; );
-            // SET COINBASE OUTPUT TO SUPERBLOCK SETTING
-
-            CTxOut txout = CTxOut(payment.nAmount, payment.script);
-            txNewRet.vout.push_back(txout);
-            voutSuperblockRet.push_back(txout);
-
-            // PRINT NICE LOG OUTPUT FOR SUPERBLOCK PAYMENT
-
-            CTxDestination address1;
-            ExtractDestination(payment.script, address1);
-            CBitcoinAddress address2(address1);
-
-            // TODO: PRINT NICE N.N DASH OUTPUT
-
-            DBG( cout << "CSuperblockManager::CreateSuperblock Before LogPrintf call, nAmount = " << payment.nAmount << endl; );
-            LogPrintf("NEW Superblock : output %d (addr %s, amount %d)\n", i, address2.ToString(), payment.nAmount);
-            DBG( cout << "CSuperblockManager::CreateSuperblock After LogPrintf call " << endl; );
-        } else {
-            DBG( cout << "CSuperblockManager::CreateSuperblock Payment not found " << endl; );
-        }
-    }
-
-    DBG( cout << "CSuperblockManager::CreateSuperblock End" << endl; );
+    LogPrintf("NEW Superblock : output %d (addr %s, amount %d)\n", 0, address.ToString(), payment.nAmount);
 }
 
 bool CSuperblockManager::IsValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward)
 {
-    // GET BEST SUPERBLOCK, SHOULD MATCH
-    LOCK(governance.cs);
-
-    CSuperblock_sptr pSuperblock;
-    if(CSuperblockManager::GetBestSuperblock(pSuperblock, nBlockHeight)) {
-        return pSuperblock->IsValid(txNew, nBlockHeight, blockReward);
+    if (txNew.vout.size() != 2) {
+        LogPrint("gobject", "CSuperblockManager::IsValid -- Budget payments more than 1\n");
+        return false;
     }
 
-    return false;
+    CTxOut payment = txNew.vout[1];
+    CTxDestination address1;
+    ExtractDestination(payment.scriptPubKey, address1);
+    CBitcoinAddress address2(address1);
+
+    if (address2.ToString() != Params().GetConsensus().foundationAddress) {
+        LogPrint("gobject", "CSuperblockManager::IsValid -- Unapproved payment address %s\n", address2.ToString());
+        return false;
+    }
+
+    if (payment.nValue != CSuperblockManager::GetSuperblockSubsidy(nBlockHeight)) {
+        LogPrint("gobject", "CSuperblockManager::IsValid -- Invalid superblock amount %d\n", payment.nValue);
+        return false;
+    }
+
+    return true;
+}
+
+CAmount CSuperblockManager::GetSuperblockSubsidy(int nBlockHeight)
+{
+    CAmount blockSubsidy = GetBlockSubsidy(0, nBlockHeight - 1, Params().GetConsensus());
+    return blockSubsidy / 5 * Params().GetConsensus().nSuperblockCycle; //20% of the blocks in cycle
 }
 
 CSuperblock::
@@ -734,37 +653,5 @@ bool CSuperblock::IsValid(const CTransaction& txNew, int nBlockHeight, CAmount b
 std::string CSuperblockManager::GetRequiredPaymentsString(int nBlockHeight)
 {
     LOCK(governance.cs);
-    std::string ret = "Unknown";
-
-    // GET BEST SUPERBLOCK
-
-    CSuperblock_sptr pSuperblock;
-    if(!GetBestSuperblock(pSuperblock, nBlockHeight)) {
-        LogPrint("gobject", "CSuperblockManager::GetRequiredPaymentsString -- Can't find superblock for height %d\n", nBlockHeight);
-        return "error";
-    }
-
-    // LOOP THROUGH SUPERBLOCK PAYMENTS, CONFIGURE OUTPUT STRING
-
-    for(int i = 0; i < pSuperblock->CountPayments(); i++) {
-        CGovernancePayment payment;
-        if(pSuperblock->GetPayment(i, payment)) {
-            // PRINT NICE LOG OUTPUT FOR SUPERBLOCK PAYMENT
-
-            CTxDestination address1;
-            ExtractDestination(payment.script, address1);
-            CBitcoinAddress address2(address1);
-
-            // RETURN NICE OUTPUT FOR CONSOLE
-
-            if(ret != "Unknown") {
-                ret += ", " + address2.ToString();
-            }
-            else {
-                ret = address2.ToString();
-            }
-        }
-    }
-
-    return ret;
+    return Params().GetConsensus().foundationAddress;
 }

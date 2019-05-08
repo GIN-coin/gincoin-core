@@ -341,11 +341,11 @@ public:
         consensus.nMasternodePaymentsIncreaseBlock = 350;
         consensus.nMasternodePaymentsIncreasePeriod = 10;
         consensus.nInstantSendKeepLock = 6;
-        consensus.nBudgetPaymentsStartBlock = 1000;
+        consensus.nBudgetPaymentsStartBlock = 0;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
         consensus.nBudgetProposalEstablishingTime = 60*20;
-        consensus.nSuperblockStartBlock = 1500;
+        consensus.nSuperblockStartBlock = 50;
         consensus.nSuperblockCycle = 10;
         consensus.nGovernanceMinQuorum = 1;
         consensus.nGovernanceFilterElements = 100;
@@ -386,6 +386,9 @@ public:
         
         // X16rt switch
         consensus.nX16rtTimestamp = 1519336474; //genesis + 1
+
+        // Foundation funding
+        consensus.foundationAddress = "yV1G53T9Nd2NbfZGKCWc3uXEfRmGHuqeVf";
 
         pchMessageStart[0] = 0xfc;
         pchMessageStart[1] = 0xc1;

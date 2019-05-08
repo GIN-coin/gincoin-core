@@ -77,6 +77,7 @@ public:
 
     static std::string GetRequiredPaymentsString(int nBlockHeight);
     static bool IsValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward);
+    static CAmount GetSuperblockSubsidy(int nBlockHeight);
 };
 
 /**
