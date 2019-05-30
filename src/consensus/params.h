@@ -105,6 +105,9 @@ struct Params {
     uint32_t nX16rtTimestamp;
 
     std::string foundationAddress;
+
+    uint32_t nSecondSubsidyHalvingInterval;
+    uint32_t nThirdSubsidyHalvingInterval;
 };
 } // namespace Consensus
 

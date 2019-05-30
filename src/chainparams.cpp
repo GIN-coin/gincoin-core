@@ -124,6 +124,10 @@ public:
         // X16rt switch
         consensus.nX16rtTimestamp = 1550246400; //Feb 15, 2019 @ 4pm GMT
 
+        // Custom halving intervals
+        consensus.nSecondSubsidyHalvingInterval = 229950;
+        consensus.nThirdSubsidyHalvingInterval = 210240;
+
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000432bb6a78bdfd088");
 
@@ -267,6 +271,10 @@ public:
         // X16rt switch
         consensus.nX16rtTimestamp = 1548118800; //Jan 22nd, 2019, 1am GMT
 
+        // Custom halving intervals // same as mainnet
+        consensus.nSecondSubsidyHalvingInterval = 229950;
+        consensus.nThirdSubsidyHalvingInterval = 210240;
+
         pchMessageStart[0] = 0xce;
         pchMessageStart[1] = 0xe2;
         pchMessageStart[2] = 0xca;
@@ -361,7 +369,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nPowKGWHeight = 15200; // same as mainnet
-        consensus.nPowDGWHeight = 200; // same as mainnet
+        consensus.nPowDGWHeight = 20000;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // Faster than normal for regtest (144 instead of 2016)
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -386,6 +394,10 @@ public:
         
         // X16rt switch
         consensus.nX16rtTimestamp = 1519336474; //genesis + 1
+
+        // Custom halving intervals
+        consensus.nSecondSubsidyHalvingInterval = 100;
+        consensus.nThirdSubsidyHalvingInterval = 50;
 
         // Foundation funding
         consensus.foundationAddress = "yV1G53T9Nd2NbfZGKCWc3uXEfRmGHuqeVf";
