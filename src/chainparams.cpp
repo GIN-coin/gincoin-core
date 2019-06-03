@@ -128,11 +128,14 @@ public:
         consensus.nSecondSubsidyHalvingInterval = 229950;
         consensus.nThirdSubsidyHalvingInterval = 210240;
 
+        // Foundation funding
+        consensus.foundationAddress = "GbqLP5AcRjyatmScVjyqrmpsZS7PJ4ThWx";
+
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000432bb6a78bdfd088");
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000004732a4bec5899f1f");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00000000000c387c392dcced588abbd71b786f71dca736aa0566ce312f62f8c1"); // 260,000
+        consensus.defaultAssumeValid = uint256S("0x00000000000af87f0974e8c1439e5013426482a4a53be4b88fa19ee04256d133"); // 316,424
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -186,7 +189,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
-        strSporkPubKey = "042b48adece7919b622ecbb79b8c54d2f042bd25f4e944debb18b60b749a04727f36c48205c5732b8b0a703aabb1830422ee244bc96c7bdafe86f1c32fcd97c356";
+        strSporkPubKey = "0425aecce6e67c80c96504f44b6d2e968969af936e1898838663ef74cf49d1f32ba45ef2072fe74582b1be3beb0adec5a37a2d5c2f46a7ccfd80ac8ae7a4f100b9";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
@@ -197,9 +200,10 @@ public:
                     ( 22092, uint256S("0x00000000000a106c24554e369cdacdb683fd6daef276ca38b1991ad82e74dc63"))
                     ( 225000, uint256S("0x0000000000015fe3dbdb0ed7d40bd4441bc1c775441ad14052770d9e8306e3a6"))
                     ( 260000, uint256S("0x00000000000c387c392dcced588abbd71b786f71dca736aa0566ce312f62f8c1"))
+                    ( 316424, uint256S("0x00000000000af87f0974e8c1439e5013426482a4a53be4b88fa19ee04256d133"))
             ,
-            1552502805, // * UNIX timestamp of last checkpoint block
-            542874,     // * total number of transactions between genesis and last checkpoint
+            1559561569, // * UNIX timestamp of last checkpoint block
+            646419,     // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)
             1350        // * estimated number of transactions per day after checkpoint
         };
@@ -219,12 +223,12 @@ public:
         consensus.nMasternodePaymentsIncreaseBlock = 158000; // actual historical value - not used
         consensus.nMasternodePaymentsIncreasePeriod = 576*30; // 17280 - actual historical value - not used
         consensus.nInstantSendKeepLock = 6;
-        consensus.nBudgetPaymentsStartBlock = 99999999; // not used
+        consensus.nBudgetPaymentsStartBlock = 32300;
         consensus.nBudgetPaymentsCycleBlocks = 50;
         consensus.nBudgetPaymentsWindowBlocks = 10;
         consensus.nBudgetProposalEstablishingTime = 60*20;
-        consensus.nSuperblockStartBlock = 99999999; // NOTE: Should satisfy nSuperblockStartBlock > nBudgetPeymentsStartBlock
-        consensus.nSuperblockCycle = 24; // Superblocks can be issued hourly on testnet
+        consensus.nSuperblockStartBlock = 32350; // NOTE: Should satisfy nSuperblockStartBlock > nBudgetPeymentsStartBlock
+        consensus.nSuperblockCycle = 30; // Superblocks can be issued hourly on testnet
         consensus.nGovernanceMinQuorum = 1;
         consensus.nGovernanceFilterElements = 500;
         consensus.nMasternodeMinimumConfirmations = 1;
@@ -275,6 +279,9 @@ public:
         consensus.nSecondSubsidyHalvingInterval = 229950;
         consensus.nThirdSubsidyHalvingInterval = 210240;
 
+        // Foundation funding
+        consensus.foundationAddress = "yehNcTJ6vMYGPWzMUbVDcw826JWqfVgADZ";
+
         pchMessageStart[0] = 0xce;
         pchMessageStart[1] = 0xe2;
         pchMessageStart[2] = 0xca;
@@ -320,7 +327,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
-        strSporkPubKey = "04646afcac0a7c8558a3d941bcf93422109972c17e836c4791884bbc44cd6ed2318885dc5398a8123c6a9d35294b45a51c46f1fb8a69f7b13ed3a2d82dd7fd3fe4";
+        strSporkPubKey = "0470e5062e9efe6154ad690fac9a70177152d4afbd86a04a837431644f1f7ca948d4dfa0ef6c389ef6c2d550cb15ad579163f4e3692aa181512e2d7dbf5223eeb0";
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
